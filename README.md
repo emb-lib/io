@@ -20,8 +20,10 @@ There is no `printf` function, but it can be easely added at user's project leve
 #include <stdarg.h>
 #include <string.h>
 
+const int TX_BUF_SIZE 256;
+
 os_mutex mutex;
-char print_buf[TX_BUF_SIZE/2];
+char print_buf[TX_BUF_SIZE];
 
 int printf(char *format, ...)
 {
