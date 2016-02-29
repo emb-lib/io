@@ -27,18 +27,19 @@ char print_buf[TX_BUF_SIZE];
 
 int printf(char *format, ...)
 {
-    mutex_lock();
-    va_list args;
-    va_start(args, format);
-    uint16_t size = vsprintf(print_buf, format, args);
-    va_end(args);
-
-    TxBuf.write(print_buf, size);
-    
-    mutex_unlock();
-    
-    uart_tx_enable();
-
+    mutex_lock();                                      // thread-safe guard
+                                                       //
+    va_list args;                                      //
+    va_start(args, format);                            //
+    uint16_t size = vsprintf(print_buf, format, args); //
+    va_end(args);                                      //
+                                                       //
+    TxBuf.write(print_buf, size);                      // put formatted data to port buffer
+                                                       //
+    mutex_unlock();                                    //
+                                                       //
+    uart_tx_enable();                                  // start output
+                                                       //
     return size;
 }
 
