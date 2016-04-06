@@ -50,9 +50,9 @@ char *itoa(int num, char *str, int radix)
     char *pTail = pDst;
     while ( pTail > pHead )
     {   // while there are still chars
-        char Tmp = *pTail;
+        char tmp = *pTail;
         *pTail-- = *pHead;
-        *pHead++ = Tmp;
+        *pHead++ = tmp;
     }
     return str;
 }
