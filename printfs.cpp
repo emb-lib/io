@@ -39,7 +39,7 @@ char * strupr(char * string)
     return Result;
 }
 //------------------------------------------------------------------------------
-extern "C" int vsprintf(char *string, const char *format, va_list ap);
+//extern "C" int vsprintf(char *string, const char *format, va_list ap);
 extern "C" int sprintf(char *buffer, char const *format, ...)
 {
     int Len;
@@ -81,7 +81,7 @@ int vsprintf(char *string, char const *format, va_list ap)
 
     union
     {
-        struct
+        struct 
         {
             uint_fast16_t    left_justify:1; // %-
             uint_fast16_t    show_sign:1;    // %+
@@ -92,7 +92,7 @@ int vsprintf(char *string, char const *format, va_list ap)
 //            uint_fast16_t    long_val:1;     // %l
 
             uint_fast16_t    precision:1;    // format string has precision field
-        };
+        } bit_flags;
         uint_fast16_t    raw;
     } flags;
 
@@ -116,19 +116,19 @@ int vsprintf(char *string, char const *format, va_list ap)
                 switch(*format)
                 {
                 case '-':
-                    flags.left_justify = 1;
+                    flags.bit_flags.left_justify = 1;
                     continue;
                 case '+':
-                    flags.show_sign = 1;
+                    flags.bit_flags.show_sign = 1;
                     continue;
                 case '0':
-                    flags.zero_padding = 1;
+                    flags.bit_flags.zero_padding = 1;
                     continue;
                 case ' ':
-                    flags.pad_sign = 1;
+                    flags.bit_flags.pad_sign = 1;
                     continue;
                 case '#':
-                    flags.alt = 1;
+                    flags.bit_flags.alt = 1;
                     continue;
                 default:
                     break;
@@ -154,14 +154,14 @@ int vsprintf(char *string, char const *format, va_list ap)
                 if(*format == '*')
                 {
                     prec = va_arg(ap, unsigned int);
-                    flags.precision = 1;
+                    flags.bit_flags.precision = 1;
                     format++;
                 }
                 else
                 {
                     while(isdigit(*format))
                     {
-                        flags.precision = 1;
+                        flags.bit_flags.precision = 1;
                         prec = (prec * 10) + (*format - '0');
                         format++;
                     }
@@ -178,15 +178,15 @@ int vsprintf(char *string, char const *format, va_list ap)
                 if(fnum == HUGE_VAL)
                 {
                     strcpy(s, POS_INFINITY);
-                    flags.zero_padding = 0;
-                    flags.precision = 0;
+                    flags.bit_flags.zero_padding = 0;
+                    flags.bit_flags.precision = 0;
                     goto overflow;
                 }
                 else if(fnum == -HUGE_VAL)
                 {
                     strcpy(s, NEG_INFINITY);
-                    flags.zero_padding = 0;
-                    flags.precision = 0;
+                    flags.bit_flags.zero_padding = 0;
+                    flags.bit_flags.precision = 0;
                     goto overflow;
                 }
             }
@@ -202,14 +202,14 @@ int vsprintf(char *string, char const *format, va_list ap)
 //                    ltoa(va_arg(ap, long), buffer, 10);
 //                else
                     itoa(va_arg(ap, int), buffer, 10);
-                flags.alt = 0;
+                flags.bit_flags.alt = 0;
                 break;
 #ifdef  PRINTF_FLOAT
             case 'G':
-                flags.uppercase = 1;
+                flags.bit_flags.uppercase = 1;
             case 'g':
                 fnum = va_arg(ap, double);
-                if(!flags.precision)
+                if(!flags.bit_flags.precision)
                     prec = 6;
                 {
                     double sfnum = fnum;
@@ -228,10 +228,10 @@ int vsprintf(char *string, char const *format, va_list ap)
                 goto format_f;
 
             case 'E':
-                flags.uppercase = 1;
+                flags.bit_flags.uppercase = 1;
             case 'e':
                 fnum = va_arg(ap, double);
-                if(!flags.precision)
+                if(!flags.bit_flags.precision)
                     prec = 6;
                 {
                     double sfnum = fnum;
@@ -248,9 +248,9 @@ int vsprintf(char *string, char const *format, va_list ap)
                 }
                 fnum *= 10.0;
                 fnum += _FLOAT_ROUND_ADJUST;
-                if(flags.alt || prec)
+                if(flags.bit_flags.alt || prec)
                 {
-                    flags.precision = 0;
+                    flags.bit_flags.precision = 0;
                     *s++ = '.';
                     uint_fast8_t fprec = 0;
                     while(prec)
@@ -271,7 +271,7 @@ int vsprintf(char *string, char const *format, va_list ap)
                         prec--;
                     }
                 }
-                *s = flags.uppercase ? 'E' : 'e';
+                *s = flags.bit_flags.uppercase ? 'E' : 'e';
                 if(fpower >= 0)
                 {
                     *s++ = '+';
@@ -288,7 +288,7 @@ int vsprintf(char *string, char const *format, va_list ap)
                 break;
             case 'f':
                 fnum = va_arg(ap, double);
-                if(!flags.precision)
+                if(!flags.bit_flags.precision)
                     prec = 6;
             format_f:
                 fpower = _floatp10(&fnum, &negative, prec);
@@ -321,9 +321,9 @@ int vsprintf(char *string, char const *format, va_list ap)
                     }
                     fpower = 0;
                 }
-                if(flags.alt || prec)
+                if(flags.bit_flags.alt || prec)
                 {
-                    flags.precision = 0;
+                    flags.bit_flags.precision = 0;
                     *s++ = '.';
                     uint_fast8_t fprec = 0;
                     while(prec)
@@ -362,7 +362,7 @@ int vsprintf(char *string, char const *format, va_list ap)
                 continue;
 
             case 'o':
-                if(flags.alt)
+                if(flags.bit_flags.alt)
                     *s++ = '0';
 //                if(flags.long_val)
 //                    ultoa(va_arg(ap, unsigned long), s, 8);
@@ -377,9 +377,9 @@ int vsprintf(char *string, char const *format, va_list ap)
 
             case 's':
                 s = va_arg(ap, char *);
-                flags.show_sign = 0;
-                flags.zero_padding = 0;
-                flags.pad_sign = 0;
+                flags.bit_flags.show_sign = 0;
+                flags.bit_flags.zero_padding = 0;
+                flags.bit_flags.pad_sign = 0;
                 break;
 
             case 'u':
@@ -392,7 +392,7 @@ int vsprintf(char *string, char const *format, va_list ap)
             case 'x':
             case 'X':
                 s = buffer;
-                if(flags.alt)
+                if(flags.bit_flags.alt)
                 {
                     *s++ = '0';
                     *s++ = *format;
@@ -418,13 +418,13 @@ overflow:
                 char schar = '\0';
                 size_t  maxlen = -1;
 
-                if(flags.left_justify)
-                    flags.zero_padding = 0;
+                if(flags.bit_flags.left_justify)
+                    flags.bit_flags.zero_padding = 0;
                 if(*format == 's')
                 {
-                    if(flags.precision)
+                    if(flags.bit_flags.precision)
                     {
-                        flags.precision = 0;
+                        flags.bit_flags.precision = 0;
                         maxlen = prec;
                     }
                 }
@@ -432,16 +432,16 @@ overflow:
                 {
                     if(ssize == 1 && *s == '0')
                     {
-                        if(flags.precision && prec == 0)
+                        if(flags.bit_flags.precision && prec == 0)
                         {
                             *s = '\0';
                             ssize = 0;
                             dsize = 0;
                         }
                     }
-                    if(*format == 'o' && flags.alt && prec < ssize) //????????
+                    if(*format == 'o' && flags.bit_flags.alt && prec < ssize) //????????
                     {
-                        flags.precision = 1;
+                        flags.bit_flags.precision = 1;
                         prec = ssize + 1;
                     }
                     if(*s == '-')
@@ -450,12 +450,12 @@ overflow:
                         schar = '-';
                         dsize--;
                     }
-                    else if(flags.show_sign)
+                    else if(flags.bit_flags.show_sign)
                     {
                         schar = '+';
                         ssize++;
                     }
-                    else if(flags.pad_sign)
+                    else if(flags.bit_flags.pad_sign)
                     {
                         schar = ' ';
                         ssize++;
@@ -463,7 +463,7 @@ overflow:
                 }
                 if(width > ssize)
                 {
-                    if(flags.precision && (prec > dsize))
+                    if(flags.bit_flags.precision && (prec > dsize))
                     {
                         padlen = width - (ssize + (prec - dsize));
                     }
@@ -472,16 +472,16 @@ overflow:
                         padlen = width - ssize;
                     }
                 }
-                if(flags.precision && (prec > dsize))
+                if(flags.bit_flags.precision && (prec > dsize))
                 {
                     zpadlen = prec - dsize;
                 }
-                else if(flags.zero_padding)
+                else if(flags.bit_flags.zero_padding)
                 {
                     zpadlen = padlen;
                     padlen = 0;
                 }
-                while(!flags.left_justify && (padlen > 0))
+                while(!flags.bit_flags.left_justify && (padlen > 0))
                 {
                     *output++ = ' ';
                     padlen--;
@@ -506,7 +506,7 @@ overflow:
                     *output++ = *s++;
                 }
 
-                while(flags.left_justify && (padlen > 0))
+                while(flags.bit_flags.left_justify && (padlen > 0))
                 {
                     *output++ = ' ';
                     padlen--;
