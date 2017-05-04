@@ -56,8 +56,6 @@ extern int _floatp10(double *fnum, bool *negative, int prec);
 #endif
 
 // as sizeof(int) == sizeof(long), 'l' specifier ignored
-extern "C" char *itoa(int num, char *str, int radix);
-extern "C" char *utoa(unsigned num, char *str, int radix);
 
 //------------------------------------------------------------------------------
 int vsprintf(char *string, char const *format, va_list ap)
