@@ -1,6 +1,6 @@
 # Formatted input/output support library for embedded applications
 
-Only output functionality is supported for now.
+Only output functionality is supported for now. Use `-std=gnu++11` option to turn on non-standard functions support (necessary for `itoa`, `utoa`).
 
 ## Functions
 
@@ -8,9 +8,6 @@ Only output functionality is supported for now.
 extern "C" int vsprintf(char *string, const char *format, va_list ap);
 extern "C" int sprintf(char *buffer, char const *format, ...)
 extern int _floatp10(double *fnum, bool *negative, int prec);
-extern "C" char *itoa(int num, char *str, int radix);
-extern "C" char *utoa(unsigned num, char *str, int radix);
-
 ```
 
 There is no `printf` function, but it can be easely added at user's project level even in thread-safe implementation(note, standard `printf` is not reentrant function) and using uC UART port for output, for example:
