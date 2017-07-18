@@ -20,6 +20,14 @@
 
 #define _FLOAT_ROUND_ADJUST (double)5e-15
 
+#if __cplusplus < 201103L
+extern "C"
+{
+    char* itoa(int num, char *str, int radix);
+    char* utoa(unsigned int num, char *str, int radix);
+}
+#endif
+
 //------------------------------------------------------------------------------
 int toupper(int c)
 {
